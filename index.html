@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>生肖與 24 節氣 | Chinese Zodiac & Solar Terms Explorer</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Serif+TC:wght@400;600;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Noto Serif TC', 'serif'],
+            sans: ['Poppins', 'sans-serif'],
+            cinzel: ['Cinzel', 'serif']
+          },
+          colors: {
+            vermilion: { 50: '#fff5f5', 100: '#ffe3e3', 500: '#e53e3e', 600: '#c53030', 800: '#9b2c2c', 900: '#742a2a' },
+            imperial: { gold: '#d4af37', darkGold: '#aa7c11', lightGold: '#fef3c7', jade: '#2e7d32', ink: '#1a1818' },
+            season: {
+              spring: '#2e7d32',
+              summer: '#c53030',
+              autumn: '#d97706',
+              winter: '#1e3a8a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Poppins', 'Noto Serif TC', serif;
+      background-color: #fcfbfa;
+      color: #1a1818;
+      background-image: radial-gradient(#e5e0d8 0.75px, transparent 0.75px);
+      background-size: 24px 24px;
+    }
+
+    .chinese-serif {
+      font-family: 'Noto Serif TC', serif;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+    }
+
+    .gold-gradient {
+      background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%);
+    }
+
+    .gold-border-glow {
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1ede6;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #d4af37;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #aa7c11;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-200 selection:text-amber-950">
+
+  <!-- Header Navigation -->
+  <header class="w-full max-w-6xl mx-auto px-4 pt-6 pb-4 flex flex-wrap justify-between items-center gap-4 border-b border-amber-900/10">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-full gold-gradient flex items-center justify-center text-white shadow-lg ring-2 ring-amber-300/50">
+        <i data-lucide="compass" class="w-7 h-7 animate-spin-slow"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl md:text-3xl font-black chinese-serif text-amber-950 tracking-wide flex items-center gap-2" id="ui-app-title">
+          生肖與 24 節氣
+        </h1>
+        <p class="text-xs md:text-sm text-amber-800/80 font-medium" id="ui-app-subtitle">天文太陽黃經演算 · 生辰推算</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Language Switcher -->
+      <button id="lang-toggle-btn" onclick="toggleLanguage()" class="px-4 py-2 rounded-full border border-amber-400 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs md:text-sm font-semibold transition flex items-center gap-2 shadow-sm active:scale-95">
+        <i data-lucide="languages" class="w-4 h-4 text-amber-700"></i>
+        <span id="lang-btn-text">English</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="w-full max-w-6xl mx-auto px-4 py-6 flex-grow space-y-8">
+
+    <!-- Interactive Date Input & Precision Controls Section -->
+    <section id="calculator-section" class="glass-card rounded-3xl p-6 md:p-8 shadow-xl border border-amber-200/80 gold-border-glow">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div class="space-y-2 lg:max-w-md">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold uppercase tracking-wider">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-600"></i>
+            <span id="ui-input-badge">精準天文測算</span>
+          </div>
+          <h2 class="text-xl md:text-2xl font-bold chinese-serif text-amber-950" id="ui-input-title">請選擇您的出生日期</h2>
+          <p class="text-xs md:text-sm text-amber-800/70" id="ui-input-desc">依出生日期判斷交節點前後之生肖與年份。</p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 flex-grow lg:max-w-xl items-stretch">
+          <div class="flex-grow">
+            <label class="block text-xs font-bold text-amber-900 mb-1" id="ui-label-date">出生日期 (Date)</label>
+            <input type="date" id="dob-date" onchange="calculateResults()" class="w-full px-4 py-3 text-sm md:text-base rounded-xl border-2 border-amber-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none bg-white text-amber-950 shadow-inner cursor-pointer transition font-medium">
+          </div>
+          <div class="flex items-end">
+            <button onclick="setToday()" class="w-full sm:w-auto px-5 py-3 rounded-xl gold-gradient text-white font-bold text-sm shadow-md hover:brightness-110 active:scale-95 transition flex items-center justify-center gap-2">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+              <span id="ui-btn-today">今日日期</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <div id="results-container" class="space-y-8">
+      
+      <!-- Top Grid: Zodiac Card & Solar Distance Card -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Zodiac & Year Card (5 Columns) -->
+        <div class="lg:col-span-5 glass-card rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden flex flex-col justify-center border-t-4 border-amber-500">
+          <div class="absolute -right-8 -bottom-8 opacity-5 pointer-events-none text-9xl font-black chinese-serif text-amber-950" id="zodiac-bg-char">
+            馬
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-800 bg-amber-100/90 px-3 py-1 rounded-full flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-700"></i>
+                <span id="ui-zodiac-header">生肖與年份</span>
+              </span>
+              <span class="text-xs text-amber-800/60 font-medium" id="ui-zodiac-note">依立春交節點計算</span>
+            </div>
+
+            <div class="flex items-center gap-5 my-4">
+              <div class="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-amber-50 to-amber-100/80 rounded-2xl border-2 border-amber-200 flex items-center justify-center text-5xl md:text-6xl shadow-md flex-shrink-0" id="zodiac-emoji">
+                🐴
+              </div>
+              <div class="space-y-1">
+                <h3 class="text-3xl md:text-4xl font-black chinese-serif text-amber-950" id="zodiac-name">午馬</h3>
+                <p class="text-base font-semibold text-amber-800" id="zodiac-ganzhi">2026年 (丙午年)</p>
+                <p class="text-xs text-amber-700/80" id="zodiac-english-title">Year of the Horse</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Solar Terms Offset & Precision Countdown (7 Columns) -->
+        <div class="lg:col-span-7 glass-card rounded-3xl p-6 md:p-8 shadow-xl flex flex-col justify-between border-t-4 border-amber-500">
+          <div>
+            <div class="flex justify-between items-center mb-4">
+              <div class="flex items-center gap-2">
+                <i data-lucide="sun-moon" class="w-5 h-5 text-amber-600"></i>
+                <h3 class="text-lg font-bold text-amber-950 chinese-serif" id="ui-solar-header">相鄰 24 節氣交節時間與距離</h3>
+              </div>
+              <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-900" id="current-ecliptic-degree">
+                太陽黃經: 215.4°
+              </span>
+            </div>
+
+            <!-- Ecliptic Progress Bar -->
+            <div class="mb-6 bg-amber-100/60 p-4 rounded-2xl border border-amber-200/60">
+              <div class="flex justify-between text-xs font-bold text-amber-900 mb-1.5">
+                <span id="progress-prev-name">霜降 (210°)</span>
+                <span id="progress-current-status" class="text-amber-700 font-extrabold">生日交點位置</span>
+                <span id="progress-next-name">立冬 (225°)</span>
+              </div>
+              <div class="w-full bg-amber-200 h-3 rounded-full overflow-hidden p-0.5 relative">
+                <div id="ecliptic-progress-bar" class="gold-gradient h-full rounded-full transition-all duration-700" style="width: 36%;"></div>
+              </div>
+              <div class="flex justify-between text-[11px] text-amber-800/70 mt-1">
+                <span id="progress-prev-date">10-23 06:12</span>
+                <span id="progress-next-date">11-07 09:30</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Preceding Solar Term -->
+              <div id="prev-term-card" class="p-5 rounded-2xl border transition-all duration-300 relative">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-xs font-bold text-amber-800/70" id="ui-prev-label">前一個節氣</span>
+                  <span id="prev-closest-badge" class="hidden text-[10px] bg-amber-600 text-white font-bold px-2 py-0.5 rounded-full">最近</span>
+                </div>
+                <div class="flex items-baseline justify-between mb-1">
+                  <div class="text-2xl font-black chinese-serif text-amber-950" id="prev-term-name">霜降</div>
+                  <span class="text-xs font-bold text-amber-700" id="prev-term-angle">黃經 210°</span>
+                </div>
+                <div class="text-xs font-medium text-amber-800/90 mb-3" id="prev-term-date">交節時間: 2026-10-23 06:12</div>
+                <div class="text-xs font-medium text-amber-900 bg-white/80 p-2.5 rounded-xl border border-amber-200/60 flex items-center gap-1.5 shadow-sm" id="prev-term-days">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i>
+                  <span>相差 4 天 12 小時</span>
+                </div>
+              </div>
+
+              <!-- Succeeding Solar Term -->
+              <div id="next-term-card" class="p-5 rounded-2xl border transition-all duration-300 relative">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-xs font-bold text-amber-800/70" id="ui-next-label">後一個節氣</span>
+                  <span id="next-closest-badge" class="hidden text-[10px] bg-amber-600 text-white font-bold px-2 py-0.5 rounded-full">最近</span>
+                </div>
+                <div class="flex items-baseline justify-between mb-1">
+                  <div class="text-2xl font-black chinese-serif text-amber-950" id="next-term-name">立冬</div>
+                  <span class="text-xs font-bold text-amber-700" id="next-term-angle">黃經 225°</span>
+                </div>
+                <div class="text-xs font-medium text-amber-800/90 mb-3" id="next-term-date">交節時間: 2026-11-07 09:30</div>
+                <div class="text-xs font-medium text-amber-900 bg-white/80 p-2.5 rounded-xl border border-amber-200/60 flex items-center gap-1.5 shadow-sm" id="next-term-days">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i>
+                  <span>相差 10 天 18 小時</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full max-w-6xl mx-auto px-4 py-8 text-center text-xs text-amber-900/60 border-t border-amber-200/60 mt-12 space-y-2">
+    <p id="ui-footer">© BojianaShanti</p>
+    <p class="text-[11px] text-amber-800/40"> Designed for elegance, tradition, and precision timekeeping.</p>
+  </footer>
+
+  <!-- Inline Application Logic & Data Engine -->
+  <script>
+    // ------------------------------------------------------------------
+    // State & i18n Data
+    // ------------------------------------------------------------------
+    let currentLang = 'zh';
+
+    const I18N = {
+      zh: {
+        appTitle: "生肖與 24 節氣",
+        appSubtitle: "天文太陽黃經演算 · 生辰推算",
+        inputBadge: "精準天文測算",
+        inputTitle: "請選擇您的出生日期",
+        inputDesc: "依出生日期判斷交節點前後之生肖與年份。",
+        labelDate: "出生日期 (Date)",
+        btnToday: "今日日期",
+        zodiacHeader: "生肖與年份",
+        zodiacNote: "依立春交節點計算",
+        solarHeader: "相鄰 24 節氣交節時間與距離",
+        prevLabel: "前一個節氣",
+        nextLabel: "後一個節氣",
+        closestBadge: "距離最近",
+        daysDiff: (d, h) => `相差 ${d} 天 ${h} 小時`,
+        sameDay: "就在生日當天交節！",
+        footer: "© BojianaShanti",
+        langBtn: "English",
+        eclipticTag: "太陽黃經"
+      },
+      en: {
+        appTitle: "Zodiac & Solar Terms Explorer",
+        appSubtitle: "Astronomical Ecliptic Calculation",
+        inputBadge: "Astronomical Precision",
+        inputTitle: "Select Your Date of Birth",
+        inputDesc: "Calculate Zodiac and year from your birth date.",
+        labelDate: "Date of Birth",
+        btnToday: "Today",
+        zodiacHeader: "Zodiac & Year",
+        zodiacNote: "Calculated from Lichun (Spring Begins)",
+        solarHeader: "Adjacent Solar Terms & Day/Hour Offsets",
+        prevLabel: "Preceding Solar Term",
+        nextLabel: "Succeeding Solar Term",
+        closestBadge: "Closest",
+        daysDiff: (d, h) => `${d}d ${h}h offset`,
+        sameDay: "Occurs exact on this birthday!",
+        footer: "© BojianaShanti",
+        langBtn: "繁體中文",
+        eclipticTag: "Solar Longitude"
+      }
+    };
+
+    // ------------------------------------------------------------------
+    // Astronomical & Solar Terms Master Database (24 Terms)
+    // ------------------------------------------------------------------
+    const SOLAR_TERMS_DB = [
+      { id: 0, zh: "立春", en: "Lichun (Spring Begins)", angle: 315, season: "spring", icon: "🌱", poem: "立德於春，陽氣始發。萬物復甦，大地回春。", diet: "宜多食辛溫升發之物，如韭菜、山藥、大棗，助陽氣生發。" },
+      { id: 1, zh: "雨水", en: "Yushui (Rain Water)", angle: 330, season: "spring", icon: "🌧️", poem: "隨風潛入夜，潤物細無聲。降水漸增，濕氣初動。", diet: "宜省酸增甘，健脾祛濕。多食薏仁、山藥、粥品。" },
+      { id: 2, zh: "驚蟄", en: "Jingzhe (Awakening of Insects)", angle: 345, season: "spring", icon: "⚡", poem: "春雷響，萬物長。蟄蟲驚醒，春耕始動。", diet: "宜吃梨以潤肺止咳，多飲溫水，清淡飲食以順應春氣。" },
+      { id: 3, zh: "春分", en: "Chunfen (Spring Equinox)", angle: 0, season: "spring", icon: "🌸", poem: "晝夜均，寒暑平。陰陽平衡，百花爭艷。", diet: "飲食宜保持寒熱平衡，多吃時令青菜、竹筍。" },
+      { id: 4, zh: "清明", en: "Qingming (Clear and Bright)", angle: 15, season: "spring", icon: "🌿", poem: "清明時節雨紛紛，萬物皆潔齊而清明。", diet: "宜吃青團、菊花茶，踏青舒懷，保持肝氣條達。" },
+      { id: 5, zh: "穀雨", en: "Guyu (Grain Rain)", angle: 30, season: "spring", icon: "🌾", poem: "雨生百谷，春季將盡。濕氣漸重，秧苗初插。", diet: "宜疏肝利濕，多吃紅豆、薏仁、香椿與春茶。" },
+      
+      { id: 6, zh: "立夏", en: "Lixa (Summer Begins)", angle: 45, season: "summer", icon: "☀️", poem: "斗指東南，維為立夏。萬物至此皆長大。", diet: "宜清心地會，多吃櫻桃、青梅、麥芽以養心氣。" },
+      { id: 7, zh: "小滿", en: "Xiaoman (Grain Buds)", angle: 60, season: "summer", icon: "🌽", poem: "籽粒漸滿，尚未成熟。夏熟作物灌漿結實。", diet: "宜吃苦菜、冬瓜、苦瓜，清熱瀉火，防濕熱侵襲。" },
+      { id: 8, zh: "芒種", en: "Mangzhong (Grain in Ear)", angle: 75, season: "summer", icon: "🚜", poem: "有芒之谷可種。忙碌播種，梅雨季節將至。", diet: "宜飲酸梅湯、綠豆湯，祛暑益氣，飲食宜清淡。" },
+      { id: 9, zh: "夏至", en: "Xiazhi (Summer Solstice)", angle: 90, season: "summer", icon: "🌻", poem: "日北至，日長之至。陽氣極盛，陰氣始生。", diet: "「冬吃蘿蔔夏吃薑」，適量吃涼面、苦瓜，解暑養陰。" },
+      { id: 10, zh: "小暑", en: "Xiaoshu (Slight Heat)", angle: 105, season: "summer", icon: "🍧", poem: "小暑至，頭伏始。暑氣漸濃，池塘蓮開。", diet: "宜食蓮藕、綠豆、黃瓜，清熱解暑，補充水分。" },
+      { id: 11, zh: "大暑", en: "Dashu (Great Heat)", angle: 120, season: "summer", icon: "🔥", poem: "濕熱交蒸，全年最熱。日光熾熱，萬物繁茂。", diet: "宜吃西瓜、仙草、茯苓粥，慎防中暑與脾胃受寒。" },
+
+      { id: 12, zh: "立秋", en: "Liqiu (Autumn Begins)", angle: 135, season: "autumn", icon: "🍂", poem: "涼風至，白露降，寒蟬鳴。秋高氣爽初顯。", diet: "「貼秋膘」，宜吃龍眼、山藥、茄子，少辛增酸。" },
+      { id: 13, zh: "處暑", en: "Chushu (Stopping the Heat)", angle: 150, season: "autumn", icon: "🍐", poem: "處，止也。暑氣至此而止，秋意漸濃。", diet: "宜吃鴨肉、梨子、百合，潤燥滋陰，預防秋燥。" },
+      { id: 14, zh: "白露", en: "Bailu (White Dew)", angle: 165, season: "autumn", icon: "💧", poem: "陰氣漸重，露凝而白。晨起清涼，夜溫驟降。", diet: "宜喝白露茶、吃蕃薯、大棗，添衣保暖防肺燥。" },
+      { id: 15, zh: "秋分", en: "Qiufen (Autumnal Equinox)", angle: 180, season: "autumn", icon: "🍁", poem: "陰陽相半，晝夜均長。蟹黃膏肥，丹桂飄香。", diet: "宜吃螃蟹配薑醋、芝麻、核桃，保持平補滋潤。" },
+      { id: 16, zh: "寒露", en: "Hanlu (Cold Dew)", angle: 195, season: "autumn", icon: "🍵", poem: "露氣寒冷，將凝結為霜。菊花盛開，登高遠眺。", diet: "宜吃芝麻、柿子、蓮藕，養陰防燥，適當進補。" },
+      { id: 17, zh: "霜降", en: "Shuangjiang (Frost Descent)", angle: 210, season: "autumn", icon: "🎃", poem: "氣肅而凝，露結為霜。深秋將盡，冬日將臨。", diet: "宜吃柿子、牛肉、栗子、山藥，平補健脾防寒。" },
+
+      { id: 18, zh: "立冬", en: "Lidong (Winter Begins)", angle: 225, season: "winter", icon: "❄️", poem: "冬，終也，萬物收藏。水始冰，地始凍。", diet: "宜吃餃子、羊肉爐、黑米，封藏補腎，養精蓄銳。" },
+      { id: 19, zh: "小雪", en: "Xiaoxue (Light Snow)", angle: 240, season: "winter", icon: "🌨️", poem: "氣寒而將雪，地寒未甚。江南臘肉香，北國初雪飛。", diet: "宜吃臘肉、排骨湯、黑芝麻，多曬太陽防抑鬱。" },
+      { id: 20, zh: "大雪", en: "Daxue (Heavy Snow)", angle: 255, season: "winter", icon: "☃️", poem: "至此而雪盛。萬里冰封，積雪盈尺。", diet: "宜吃紅薯、羊肉、枸杞粥，強身健體，禦寒補腎。" },
+      { id: 21, zh: "冬至", en: "Dongzhi (Winter Solstice)", angle: 270, season: "winter", icon: "🥣", poem: "日南至，日短之至。陰極之至，陽氣始生。", diet: "北方吃水餃，南方吃湯圓。宜吃當歸羊肉湯。" },
+      { id: 22, zh: "小寒", en: "Xiaohan (Slight Cold)", angle: 285, season: "winter", icon: "🧊", poem: "冷氣積久而為寒。進入三九天，寒風刺骨。", diet: "宜吃糯米飯、臘八粥、栗子，補氣健脾禦寒。" },
+      { id: 23, zh: "大寒", en: "Dahan (Great Cold)", angle: 300, season: "winter", icon: "🌬️", poem: "大者，乃凜冽之極。歲暮冬深，迎春接福。", diet: "宜吃消寒糕、桂圓、八寶飯，溫補脾腎，準備迎春。" }
+    ];
+
+    // Zodiac Details DB
+    const ZODIAC_DB = {
+      "鼠": { en: "Rat" },
+      "牛": { en: "Ox" },
+      "虎": { en: "Tiger" },
+      "兔": { en: "Rabbit" },
+      "龍": { en: "Dragon" },
+      "蛇": { en: "Snake" },
+      "馬": { en: "Horse" },
+      "羊": { en: "Goat" },
+      "猴": { en: "Monkey" },
+      "雞": { en: "Rooster" },
+      "狗": { en: "Dog" },
+      "豬": { en: "Pig" }
+    };
+
+    const HEAVENLY_STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+    const EARTHLY_BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+    const ZODIAC_ANIMALS = ["鼠", "牛", "虎", "兔", "龍", "蛇", "馬", "羊", "猴", "雞", "狗", "豬"];
+    const ZODIAC_EMOJIS = { "鼠": "🐭", "牛": "🐮", "虎": "🐯", "兔": "🐰", "龍": "🐲", "蛇": "🐍", "馬": "🐴", "羊": "🐑", "猴": "🐵", "雞": "🐔", "狗": "🐶", "豬": "🐷" };
+
+    // ------------------------------------------------------------------
+    // Precision Astronomical Engine (Ecliptic Longitude)
+    // ------------------------------------------------------------------
+    function getSolarLongitude(date) {
+      const year = date.getUTCFullYear();
+      const month = date.getUTCMonth() + 1;
+      const day = date.getUTCDate();
+      const hour = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+
+      let y = year;
+      let m = month;
+      if (m <= 2) { y -= 1; m += 12; }
+
+      const A = Math.floor(y / 100);
+      const B = 2 - A + Math.floor(A / 4);
+      const JD = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + hour / 24 + B - 1524.5;
+
+      const T = (JD - 2451545.0) / 36525.0;
+      let L0 = 280.46646 + 36000.76983 * T + 0.0003032 * (T ** 2);
+      let M = 357.52911 + 35999.05029 * T - 0.0001537 * (T ** 2);
+
+      L0 = (L0 % 360 + 360) % 360;
+      M = (M % 360 + 360) % 360;
+
+      const M_rad = M * Math.PI / 180;
+      const C = (1.914602 - 0.004817 * T) * Math.sin(M_rad)
+              + (0.019993 - 0.000101 * T) * Math.sin(2 * M_rad)
+              + 0.000289 * Math.sin(3 * M_rad);
+
+      let sunLong = L0 + C;
+      const Omega = 125.04 - 1934.136 * T;
+      sunLong = sunLong - 0.00569 - 0.00478 * Math.sin(Omega * Math.PI / 180);
+
+      return (sunLong % 360 + 360) % 360;
+    }
+
+    function findExactSolarTermDate(targetYear, targetLongitude) {
+      let low = new Date(Date.UTC(targetYear, 0, 1)).getTime();
+      let high = new Date(Date.UTC(targetYear, 11, 31, 23, 59, 59)).getTime();
+
+      for (let i = 0; i < 28; i++) {
+        const mid = (low + high) / 2;
+        const midDate = new Date(mid);
+        let l = getSolarLongitude(midDate);
+
+        let diff = l - targetLongitude;
+        if (diff < -180) diff += 360;
+        if (diff > 180) diff -= 360;
+
+        if (diff > 0) high = mid;
+        else low = mid;
+      }
+      return new Date((low + high) / 2);
+    }
+
+    function getLichunDate(year) {
+      return findExactSolarTermDate(year, 315);
+    }
+
+    function getGanzhiAndZodiac(date) {
+      const year = date.getFullYear();
+      const lichunDate = getLichunDate(year);
+
+      let ganzhiYear = year;
+      if (date < lichunDate) {
+        ganzhiYear = year - 1;
+      }
+
+      const stemIndex = (ganzhiYear - 4) % 10 < 0 ? ((ganzhiYear - 4) % 10) + 10 : (ganzhiYear - 4) % 10;
+      const branchIndex = (ganzhiYear - 4) % 12 < 0 ? ((ganzhiYear - 4) % 12) + 12 : (ganzhiYear - 4) % 12;
+
+      const stem = HEAVENLY_STEMS[stemIndex];
+      const branch = EARTHLY_BRANCHES[branchIndex];
+      const animal = ZODIAC_ANIMALS[branchIndex];
+
+      return {
+        ganzhiYear: ganzhiYear,
+        stem: stem,
+        branch: branch,
+        animal: animal,
+        emoji: ZODIAC_EMOJIS[animal]
+      };
+    }
+
+    function getAdjacentSolarTerms(birthDate) {
+      const bYear = birthDate.getFullYear();
+      let allTerms = [];
+
+      for (let y = bYear - 1; y <= bYear + 1; y++) {
+        SOLAR_TERMS_DB.forEach(st => {
+          const exactDate = findExactSolarTermDate(y, st.angle);
+          allTerms.push({
+            ...st,
+            exactDate: exactDate
+          });
+        });
+      }
+
+      allTerms.sort((a, b) => a.exactDate - b.exactDate);
+
+      let prevTerm = null;
+      let nextTerm = null;
+
+      for (let i = 0; i < allTerms.length; i++) {
+        if (allTerms[i].exactDate <= birthDate) {
+          prevTerm = allTerms[i];
+        } else {
+          nextTerm = allTerms[i];
+          break;
+        }
+      }
+
+      return { prevTerm, nextTerm };
+    }
+
+    // Format Date local string
+    function formatDateWithTime(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      const hh = String(date.getHours()).padStart(2, '0');
+      const mm = String(date.getMinutes()).padStart(2, '0');
+      return `${y}-${m}-${d} ${hh}:${mm}`;
+    }
+
+    // ------------------------------------------------------------------
+    // Controller & UI Render Functions
+    // ------------------------------------------------------------------
+    function calculateResults() {
+      const dateVal = document.getElementById('dob-date').value;
+      if (!dateVal) return;
+
+      const [year, month, day] = dateVal.split('-').map(Number);
+      const birthDate = new Date(year, month - 1, day, 12, 0, 0);
+
+      // 1. Calculate Solar Longitude & Zodiac
+      const currentSunLong = getSolarLongitude(birthDate);
+      const zodiacInfo = getGanzhiAndZodiac(birthDate);
+
+      // 2. Adjacent Terms
+      const { prevTerm, nextTerm } = getAdjacentSolarTerms(birthDate);
+
+      const msDiffPrev = Math.abs(birthDate - prevTerm.exactDate);
+      const msDiffNext = Math.abs(nextTerm.exactDate - birthDate);
+
+      const prevHoursTotal = Math.floor(msDiffPrev / (1000 * 60 * 60));
+      const prevDays = Math.floor(prevHoursTotal / 24);
+      const prevHours = prevHoursTotal % 24;
+
+      const nextHoursTotal = Math.floor(msDiffNext / (1000 * 60 * 60));
+      const nextDays = Math.floor(nextHoursTotal / 24);
+      const nextHours = nextHoursTotal % 24;
+
+      // 3. Update DOM Elements
+      const t = I18N[currentLang];
+      const zDetail = ZODIAC_DB[zodiacInfo.animal];
+
+      // Zodiac Card Updates
+      document.getElementById('zodiac-emoji').textContent = zodiacInfo.emoji;
+      document.getElementById('zodiac-bg-char').textContent = zodiacInfo.animal;
+      document.getElementById('zodiac-name').textContent = `${zodiacInfo.branch}${zodiacInfo.animal}`;
+      document.getElementById('zodiac-ganzhi').textContent = `${zodiacInfo.ganzhiYear}${currentLang==='zh'?'年':''} (${zodiacInfo.stem}${zodiacInfo.branch}${currentLang==='zh'?'年':''})`;
+      document.getElementById('zodiac-english-title').textContent = `Year of the ${zDetail.en}`;
+
+      // Solar Term Offsets
+      document.getElementById('current-ecliptic-degree').textContent = `${t.eclipticTag}: ${currentSunLong.toFixed(1)}°`;
+
+      // Ecliptic Progress Bar Calculation
+      let totalSpanAngle = nextTerm.angle - prevTerm.angle;
+      if (totalSpanAngle <= 0) totalSpanAngle += 360;
+      let currentProgressAngle = currentSunLong - prevTerm.angle;
+      if (currentProgressAngle < 0) currentProgressAngle += 360;
+      const progressPercent = Math.min(100, Math.max(0, (currentProgressAngle / totalSpanAngle) * 100));
+
+      document.getElementById('ecliptic-progress-bar').style.width = `${progressPercent}%`;
+      document.getElementById('progress-prev-name').textContent = `${prevTerm[currentLang]} (${prevTerm.angle}°)`;
+      document.getElementById('progress-next-name').textContent = `${nextTerm[currentLang]} (${nextTerm.angle}°)`;
+      document.getElementById('progress-prev-date').textContent = formatDateWithTime(prevTerm.exactDate);
+      document.getElementById('progress-next-date').textContent = formatDateWithTime(nextTerm.exactDate);
+
+      // Preceding Card
+      document.getElementById('prev-term-name').textContent = prevTerm[currentLang];
+      document.getElementById('prev-term-angle').textContent = `${prevTerm.angle}°`;
+      document.getElementById('prev-term-date').textContent = `${currentLang==='zh'?'交節時間: ':'Exact: '} ${formatDateWithTime(prevTerm.exactDate)}`;
+      document.getElementById('prev-term-days').querySelector('span').textContent = prevHoursTotal === 0 ? t.sameDay : t.daysDiff(prevDays, prevHours);
+
+      // Succeeding Card
+      document.getElementById('next-term-name').textContent = nextTerm[currentLang];
+      document.getElementById('next-term-angle').textContent = `${nextTerm.angle}°`;
+      document.getElementById('next-term-date').textContent = `${currentLang==='zh'?'交節時間: ':'Exact: '} ${formatDateWithTime(nextTerm.exactDate)}`;
+      document.getElementById('next-term-days').querySelector('span').textContent = nextHoursTotal === 0 ? t.sameDay : t.daysDiff(nextDays, nextHours);
+
+      // Closest Card Highlight
+      const prevCard = document.getElementById('prev-term-card');
+      const nextCard = document.getElementById('next-term-card');
+      const prevBadge = document.getElementById('prev-closest-badge');
+      const nextBadge = document.getElementById('next-closest-badge');
+
+      const isPrevClosest = msDiffPrev <= msDiffNext;
+
+      prevCard.className = "p-5 rounded-2xl border transition-all duration-300 " + (isPrevClosest ? "border-amber-500 bg-amber-50/80 shadow-md ring-2 ring-amber-400/30" : "border-amber-200/60 bg-white/60 opacity-80");
+      nextCard.className = "p-5 rounded-2xl border transition-all duration-300 " + (!isPrevClosest ? "border-amber-500 bg-amber-50/80 shadow-md ring-2 ring-amber-400/30" : "border-amber-200/60 bg-white/60 opacity-80");
+
+      prevBadge.classList.toggle('hidden', !isPrevClosest);
+      nextBadge.classList.toggle('hidden', isPrevClosest);
+    }
+
+    // Set today date shortcut
+    function setToday() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+
+      document.getElementById('dob-date').value = `${y}-${m}-${d}`;
+      calculateResults();
+    }
+
+    // ------------------------------------------------------------------
+    // Multi-Language Switcher
+    // ------------------------------------------------------------------
+    function toggleLanguage() {
+      currentLang = currentLang === 'zh' ? 'en' : 'zh';
+      const t = I18N[currentLang];
+
+      // Static UI Translations
+      document.getElementById('ui-app-title').textContent = t.appTitle;
+      document.getElementById('ui-app-subtitle').textContent = t.appSubtitle;
+
+      document.getElementById('ui-input-badge').textContent = t.inputBadge;
+      document.getElementById('ui-input-title').textContent = t.inputTitle;
+      document.getElementById('ui-input-desc').textContent = t.inputDesc;
+      document.getElementById('ui-label-date').textContent = t.labelDate;
+      document.getElementById('ui-btn-today').textContent = t.btnToday;
+
+      document.getElementById('ui-zodiac-header').textContent = t.zodiacHeader;
+      document.getElementById('ui-zodiac-note').textContent = t.zodiacNote;
+
+      document.getElementById('ui-solar-header').textContent = t.solarHeader;
+      document.getElementById('ui-prev-label').textContent = t.prevLabel;
+      document.getElementById('ui-next-label').textContent = t.nextLabel;
+
+      document.getElementById('ui-footer').textContent = t.footer;
+      document.getElementById('lang-btn-text').textContent = t.langBtn;
+
+      document.querySelectorAll('#prev-closest-badge, #next-closest-badge').forEach(el => {
+        el.textContent = t.closestBadge;
+      });
+
+      if (document.getElementById('dob-date').value) {
+        calculateResults();
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // Initialization on Page Load
+    // ------------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      setToday();
+    });
+  </script>
+</body>
+</html>
